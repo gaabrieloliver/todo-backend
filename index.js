@@ -10,6 +10,7 @@ const todos = [
   { id: 2, task: "Fazer deploy do front" },
 ];
 
+// Lista todas as tarefas
 app.get("/todos", (req, res) => {
   res.json(todos);
 });
@@ -19,6 +20,7 @@ app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
 
+// Adiciona uma tarefa
 app.post("/todos", (req, res) => {
   const novaTarefa = req.body.tarefa;
 
@@ -26,17 +28,39 @@ app.post("/todos", (req, res) => {
     return res.status(400).json({ erro: "Tarefa é obrigatória!" });
   }
 
-  // Definir a nova tarefa corretamente
-  const novoItem = {
-    id: todos.length + 1, // Atribui um ID baseado na quantidade de itens existentes
-    task: novaTarefa, // Usa o valor da tarefa enviada
+  const nova = {
+    id: Date.now(),
+    task: novaTarefa,
   };
 
-  // Agora você pode adicionar ela ao array todos
-  todos.push(novoItem);
+  todos.push(nova);
+  res.status(201).json({ mensagem: "Tarefa adicionada com sucesso!", nova });
+});
 
-  res
-    .status(201)
-    .json({ mensagem: "Tarefa adicionada com sucesso!", tarefa: novoItem });
+// Editar tarefa
+app.put("/todos/:id", (req, res) => {
+  const { id } = req.params;
+  const novaTarefa = req.body.tarefa;
+
+  const index = todos.findIndex((todo) => todo.id == id);
+  if (index === -1) {
+    return res.status(404).json({ erro: "Tarefa não encontrada" });
+  }
+
+  todos[index].task = novaTarefa;
+  res.json({ mensagem: "Tarefa atualizada com sucesso!" });
+});
+
+// Excluir tarefa
+app.delete("/todos/:id", (req, res) => {
+  const { id } = req.params;
+
+  const index = todos.findIndex((todo) => todo.id == id);
+  if (index === -1) {
+    return res.status(404).json({ erro: "Tarefa não encontrada" });
+  }
+
+  todos.splice(index, 1);
+  res.json({ mensagem: "Tarefa excluída com sucesso!" });
 });
 
